@@ -77,6 +77,10 @@ crawler = WebCrawler(output_dir="crawl_output", max_pages=100)
 - `tokens/page_XXXX_tfidf.txt` - TF-IDF scores for tokens
 - `lemmas/page_XXXX_tfidf.txt` - TF-IDF scores for lemmas
 
+**Task 5** (Interactive search - no file output):
+- Run `./run_task5.sh` to start search engine
+- Enter queries to search documents
+
 ## Common Issues
 
 **"Module not found"**

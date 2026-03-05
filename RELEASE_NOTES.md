@@ -77,6 +77,28 @@
 
 ---
 
+## Version 1.4 - Task 5 (March 5, 2026)
+
+### Added
+- Vector-based search engine using TF-IDF and cosine similarity
+- Interactive search interface
+- Query processing with lemmatization (English and Russian)
+- Document ranking by cosine similarity
+- Top-K results retrieval
+
+### Technical Details
+- Documents represented as TF-IDF vectors
+- Query converted to TF-IDF vector using same vocabulary
+- Cosine similarity: cos(θ) = (u·v) / (||u|| ||v||)
+- Sparse vector operations for efficiency
+- Interactive command-line interface
+
+### Files
+- `task5_search.py` - Vector search engine implementation
+- `run_task5.sh` - Run script for Task 5
+
+---
+
 ## Version 1.0 - Task 1 (March 5, 2026)
 
 ### Added
@@ -103,19 +125,3 @@
 - Only works with Wikipedia
 - No resume capability
 - Sequential downloads only
-
----
-
-## Planned
-
-### Task 3 - Indexing
-- Build inverted index
-- Term frequency analysis
-
-### Task 4 - Search
-- Query processing
-- Search functionality
-
-### Task 5 - Ranking
-- Ranking algorithms
-- Results optimization

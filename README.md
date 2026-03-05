@@ -80,6 +80,24 @@ Computes Term Frequency-Inverse Document Frequency for all terms and lemmas.
 
 (Note: Run Tasks 1 & 2 first)
 
+## Task 5: Vector Search Engine
+
+Vector-based search engine using TF-IDF and cosine similarity.
+
+**Features:**
+- Document representation as TF-IDF vectors
+- Query processing with lemmatization
+- Cosine similarity ranking
+- Interactive search interface
+- Returns top 10 results
+
+**Run:**
+```bash
+./run_task5.sh
+```
+
+(Note: Run Tasks 1 & 2 first)
+
 ## Requirements
 
 - Python 3.7+
@@ -95,10 +113,12 @@ crawler-uni/
 ├── task2_tokenizer.py    # Task 2: Tokenization
 ├── task3_indexer.py      # Task 3: Inverted Index
 ├── task4_tfidf.py        # Task 4: TF-IDF
+├── task5_search.py       # Task 5: Search Engine
 ├── run_task1.sh          # Run Task 1
 ├── run_task2.sh          # Run Task 2
 ├── run_task3.sh          # Run Task 3
 ├── run_task4.sh          # Run Task 4
+├── run_task5.sh          # Run Task 5
 ├── requirements.txt      # Python packages
 ├── README.md             # This file
 ├── DEPLOYMENT.md         # Setup instructions
