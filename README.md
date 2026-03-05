@@ -19,12 +19,30 @@ Downloads 100+ web pages from Wikipedia and saves them with HTML markup.
 - All pages in English
 - Filters out non-HTML content (images, CSS, JS, etc.)
 
-## How to Run
-
+**Run:**
 ```bash
-chmod +x run_task1.sh
 ./run_task1.sh
 ```
+
+## Task 2: Tokenization and Lemmatization
+
+Extracts tokens from each HTML page and groups them by lemmas. Creates per-page files.
+
+**Features:**
+- Extracts clean text from HTML
+- Tokenizes text into individual words
+- Filters out stop words, numbers, and non-English/Russian words
+- Proper lemmatization: WordNet for English, pymorphy2 for Russian
+- Groups tokens by their lemmas
+- Creates separate files for each page
+- Generates archives for submission
+
+**Run:**
+```bash
+./run_task2.sh
+```
+
+(Note: Run Task 1 first to download pages)
 
 ## Requirements
 
@@ -37,26 +55,43 @@ Dependencies are installed automatically by the run script.
 
 ```
 crawler-uni/
-├── task1_crawler.py      # Main crawler code
-├── run_task1.sh          # Run script
+├── task1_crawler.py      # Task 1: Crawler
+├── task2_tokenizer.py    # Task 2: Tokenization
+├── run_task1.sh          # Run Task 1
+├── run_task2.sh          # Run Task 2
 ├── requirements.txt      # Python packages
 ├── README.md             # This file
 ├── DEPLOYMENT.md         # Setup instructions
-└── crawl_output/         # Downloaded pages (created when run)
-    ├── page_0001.html
-    ├── page_0002.html
-    ├── ...
-    └── index.txt
+├── crawl_output/         # Task 1 output
+│   ├── page_XXXX.html
+│   └── index.txt
+└── tokens_output/        # Task 2 output
+    ├── tokens/
+    │   ├── page_0001_tokens.txt
+    │   └── ...
+    ├── lemmas/
+    │   ├── page_0001_lemmas.txt
+    │   └── ...
+    ├── tokens_archive.zip
+    └── lemmas_archive.zip
 ```
 
 ## Output Files
 
-- **HTML pages:** `crawl_output/page_XXXX.html`
-- **Index file:** `crawl_output/index.txt` (page numbers and URLs)
-- **URLs list:** `crawl_output/urls_list.txt`
+**Task 1:**
+- `crawl_output/page_XXXX.html` - Downloaded pages
+- `crawl_output/index.txt` - Page numbers and URLs
+
+**Task 2:**
+- `tokens_output/tokens/page_XXXX_tokens.txt` - Tokens per page
+- `tokens_output/lemmas/page_XXXX_lemmas.txt` - Lemmas per page
+- `tokens_output/tokens_archive.zip` - Archive for submission
+- `tokens_output/lemmas_archive.zip` - Archive for submission
 
 ## Technologies
 
 - Python 3
 - requests (HTTP library)
 - BeautifulSoup4 (HTML parsing)
+- NLTK (Natural Language Processing - English)
+- pymorphy2 (Russian morphological analyzer)

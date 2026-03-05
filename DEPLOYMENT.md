@@ -58,10 +58,16 @@ crawler = WebCrawler(output_dir="crawl_output", max_pages=100)
 
 ## Output
 
-After running, check `crawl_output/` directory for:
-- Downloaded HTML pages
-- `index.txt` file
-- `urls_list.txt` file
+**Task 1 Output** (`crawl_output/`):
+- `page_XXXX.html` - Downloaded pages
+- `index.txt` - Page numbers and URLs mapping
+- `urls_list.txt` - List of all URLs
+
+**Task 2 Output** (`tokens_output/`):
+- `tokens/page_XXXX_tokens.txt` - Tokens per page (one per line)
+- `lemmas/page_XXXX_lemmas.txt` - Lemmas per page (lemma + tokens)
+- `tokens_archive.zip` - Archive with all token files
+- `lemmas_archive.zip` - Archive with all lemma files
 
 ## Common Issues
 
