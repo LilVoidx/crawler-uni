@@ -69,6 +69,14 @@ crawler = WebCrawler(output_dir="crawl_output", max_pages=100)
 - `tokens_archive.zip` - Archive with all token files
 - `lemmas_archive.zip` - Archive with all lemma files
 
+**Task 3 Output** (`index_output/`):
+- `inverted_index.txt` - Inverted index (term: doc IDs)
+- `inverted_index.json` - Inverted index (JSON format)
+
+**Task 4 Output** (`tfidf_output/`):
+- `tokens/page_XXXX_tfidf.txt` - TF-IDF scores for tokens
+- `lemmas/page_XXXX_tfidf.txt` - TF-IDF scores for lemmas
+
 ## Common Issues
 
 **"Module not found"**

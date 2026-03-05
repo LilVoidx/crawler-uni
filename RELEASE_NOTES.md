@@ -54,6 +54,29 @@
 
 ---
 
+## Version 1.3 - Task 4 (March 5, 2026)
+
+### Added
+- TF-IDF (Term Frequency-Inverse Document Frequency) calculator
+- Per-document TF-IDF computation for tokens and lemmas
+- TF (term frequency) calculation per document
+- IDF (inverse document frequency) calculation across corpus
+- TF-IDF = TF × IDF scoring
+
+### Technical Details
+- TF: count of term in document
+- IDF: log(N / df(t)) where N = total docs, df(t) = docs containing term
+- Per-document output files with format: `<term> <idf> <tf-idf>`
+- Separate processing for tokens and lemmas
+- Sorted output by term name
+
+### Files
+- `task4_tfidf.py` - TF-IDF calculation implementation
+- `run_task4.sh` - Run script for Task 4
+- Output: `tfidf_output/tokens/*.txt` and `tfidf_output/lemmas/*.txt`
+
+---
+
 ## Version 1.0 - Task 1 (March 5, 2026)
 
 ### Added

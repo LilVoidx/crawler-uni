@@ -62,6 +62,24 @@ Creates an inverted index from tokens and implements Boolean search engine.
 
 (Note: Run Tasks 1 & 2 first)
 
+## Task 4: TF-IDF Calculator
+
+Computes Term Frequency-Inverse Document Frequency for all terms and lemmas.
+
+**Features:**
+- Computes TF (term frequency) per document
+- Computes IDF (inverse document frequency) across all documents
+- Calculates TF-IDF scores
+- Separate output for tokens and lemmas
+- Per-document TXT files
+
+**Run:**
+```bash
+./run_task4.sh
+```
+
+(Note: Run Tasks 1 & 2 first)
+
 ## Requirements
 
 - Python 3.7+
@@ -76,9 +94,11 @@ crawler-uni/
 ├── task1_crawler.py      # Task 1: Crawler
 ├── task2_tokenizer.py    # Task 2: Tokenization
 ├── task3_indexer.py      # Task 3: Inverted Index
+├── task4_tfidf.py        # Task 4: TF-IDF
 ├── run_task1.sh          # Run Task 1
 ├── run_task2.sh          # Run Task 2
 ├── run_task3.sh          # Run Task 3
+├── run_task4.sh          # Run Task 4
 ├── requirements.txt      # Python packages
 ├── README.md             # This file
 ├── DEPLOYMENT.md         # Setup instructions
@@ -90,9 +110,12 @@ crawler-uni/
 │   ├── lemmas/
 │   ├── tokens_archive.zip
 │   └── lemmas_archive.zip
-└── index_output/         # Task 3 output
-    ├── inverted_index.txt
-    └── inverted_index.json
+├── index_output/         # Task 3 output
+│   ├── inverted_index.txt
+│   └── inverted_index.json
+└── tfidf_output/         # Task 4 output
+    ├── tokens/
+    └── lemmas/
 ```
 
 ## Output Files
@@ -110,6 +133,10 @@ crawler-uni/
 **Task 3:**
 - `index_output/inverted_index.txt` - Inverted index (term: doc IDs)
 - `index_output/inverted_index.json` - Inverted index (JSON format)
+
+**Task 4:**
+- `tfidf_output/tokens/page_XXXX_tfidf.txt` - TF-IDF scores for tokens
+- `tfidf_output/lemmas/page_XXXX_tfidf.txt` - TF-IDF scores for lemmas
 
 ## Technologies
 
