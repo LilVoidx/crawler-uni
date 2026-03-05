@@ -78,8 +78,9 @@ crawler = WebCrawler(output_dir="crawl_output", max_pages=100)
 - `lemmas/page_XXXX_tfidf.txt` - TF-IDF scores for lemmas
 
 **Task 5** (Interactive search - no file output):
-- Run `./run_task5.sh` to start search engine
-- Enter queries to search documents
+- CLI version: Run `./run_task5.sh` and enter queries
+- Web version: Run `./run_task5_web.sh` and open http://127.0.0.1:5000
+- Web interface shows top 10 results with ranking scores
 
 ## Common Issues
 

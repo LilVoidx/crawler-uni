@@ -81,10 +81,13 @@
 
 ### Added
 - Vector-based search engine using TF-IDF and cosine similarity
-- Interactive search interface
+- Interactive CLI and Web interfaces
 - Query processing with lemmatization (English and Russian)
 - Document ranking by cosine similarity
-- Top-K results retrieval
+- Top-K results retrieval (top 10)
+- Flask-based web interface with modern UI
+- Real-time search with AJAX
+- Ranking display with scores
 
 ### Technical Details
 - Documents represented as TF-IDF vectors
@@ -92,10 +95,15 @@
 - Cosine similarity: cos(θ) = (u·v) / (||u|| ||v||)
 - Sparse vector operations for efficiency
 - Interactive command-line interface
+- Web UI with Flask framework
+- RESTful API endpoints (/search, /stats)
 
 ### Files
-- `task5_search.py` - Vector search engine implementation
-- `run_task5.sh` - Run script for Task 5
+- `task5_search.py` - Vector search engine (CLI)
+- `task5_web.py` - Vector search engine (Web)
+- `templates/search.html` - Web interface template
+- `run_task5.sh` - Run script for CLI version
+- `run_task5_web.sh` - Run script for Web version
 
 ---
 

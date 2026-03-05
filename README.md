@@ -88,13 +88,20 @@ Vector-based search engine using TF-IDF and cosine similarity.
 - Document representation as TF-IDF vectors
 - Query processing with lemmatization
 - Cosine similarity ranking
-- Interactive search interface
+- Interactive CLI and Web interfaces
+- Web interface with ranking display
 - Returns top 10 results
 
-**Run:**
+**Run CLI version:**
 ```bash
 ./run_task5.sh
 ```
+
+**Run Web version:**
+```bash
+./run_task5_web.sh
+```
+Then open http://127.0.0.1:5000 in your browser.
 
 (Note: Run Tasks 1 & 2 first)
 
