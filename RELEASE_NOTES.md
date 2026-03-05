@@ -31,6 +31,29 @@
 
 ---
 
+## Version 1.2 - Task 3 (March 5, 2026)
+
+### Added
+- Inverted index construction
+- Boolean search engine with AND, OR, NOT operators
+- Support for complex queries with parentheses
+- Shunting Yard algorithm for query parsing
+- Interactive search interface
+- Index export in TXT and JSON formats
+
+### Technical Details
+- Inverted index: term ->set of document IDs
+- Query parsing using infix to postfix conversion
+- Set operations for Boolean logic
+- Interactive command-line search
+
+### Files
+- `task3_indexer.py` - Inverted index and Boolean search
+- `run_task3.sh` - Run script for Task 3
+- Output: `inverted_index.txt`, `inverted_index.json`
+
+---
+
 ## Version 1.0 - Task 1 (March 5, 2026)
 
 ### Added

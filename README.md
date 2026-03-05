@@ -44,6 +44,24 @@ Extracts tokens from each HTML page and groups them by lemmas. Creates per-page 
 
 (Note: Run Task 1 first to download pages)
 
+## Task 3: Inverted Index and Boolean Search
+
+Creates an inverted index from tokens and implements Boolean search engine.
+
+**Features:**
+- Builds inverted index (term -> document IDs)
+- Boolean search with AND, OR, NOT operators
+- Supports complex queries with parentheses
+- Interactive search interface
+- Saves index as TXT and JSON
+
+**Run:**
+```bash
+./run_task3.sh
+```
+
+(Note: Run Tasks 1 & 2 first)
+
 ## Requirements
 
 - Python 3.7+
@@ -57,23 +75,24 @@ Dependencies are installed automatically by the run script.
 crawler-uni/
 ├── task1_crawler.py      # Task 1: Crawler
 ├── task2_tokenizer.py    # Task 2: Tokenization
+├── task3_indexer.py      # Task 3: Inverted Index
 ├── run_task1.sh          # Run Task 1
 ├── run_task2.sh          # Run Task 2
+├── run_task3.sh          # Run Task 3
 ├── requirements.txt      # Python packages
 ├── README.md             # This file
 ├── DEPLOYMENT.md         # Setup instructions
 ├── crawl_output/         # Task 1 output
 │   ├── page_XXXX.html
 │   └── index.txt
-└── tokens_output/        # Task 2 output
-    ├── tokens/
-    │   ├── page_0001_tokens.txt
-    │   └── ...
-    ├── lemmas/
-    │   ├── page_0001_lemmas.txt
-    │   └── ...
-    ├── tokens_archive.zip
-    └── lemmas_archive.zip
+├── tokens_output/        # Task 2 output
+│   ├── tokens/
+│   ├── lemmas/
+│   ├── tokens_archive.zip
+│   └── lemmas_archive.zip
+└── index_output/         # Task 3 output
+    ├── inverted_index.txt
+    └── inverted_index.json
 ```
 
 ## Output Files
@@ -87,6 +106,10 @@ crawler-uni/
 - `tokens_output/lemmas/page_XXXX_lemmas.txt` - Lemmas per page
 - `tokens_output/tokens_archive.zip` - Archive for submission
 - `tokens_output/lemmas_archive.zip` - Archive for submission
+
+**Task 3:**
+- `index_output/inverted_index.txt` - Inverted index (term: doc IDs)
+- `index_output/inverted_index.json` - Inverted index (JSON format)
 
 ## Technologies
 
