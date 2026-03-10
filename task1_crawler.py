@@ -32,11 +32,63 @@ class WebCrawler:
         """Check if URL is valid and points to HTML content"""
         try:
             parsed = urlparse(url)
+
             # Skip non-HTML files (images, CSS, JS, etc.)
             skip_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.zip',
                              '.css', '.js', '.ico', '.svg', '.mp4', '.mp3']
-            return (parsed.scheme in ['http', 'https'] and
-                   not any(parsed.path.lower().endswith(ext) for ext in skip_extensions))
+            if any(parsed.path.lower().endswith(ext) for ext in skip_extensions):
+                return False
+
+            # Only allow http/https
+            if parsed.scheme not in ['http', 'https']:
+                return False
+
+            # Skip URLs with fragments (anchors like #Overview, #History)
+            if parsed.fragment:
+                return False
+
+            # Only allow en.wikipedia.org (no other sites)
+            if parsed.netloc != 'en.wikipedia.org':
+                return False
+
+            if 'wikipedia.org' in parsed.netloc:
+                # Must be en.wikipedia.org
+                if parsed.netloc != 'en.wikipedia.org':
+                    return False
+
+                # Must be /wiki/ path (not /w/ or other paths)
+                if not parsed.path.startswith('/wiki/'):
+                    return False
+
+                # Skip meta/support pages
+                path_lower = parsed.path.lower()
+                skip_prefixes = [
+                    '/wiki/special:',
+                    '/wiki/help:',
+                    '/wiki/wikipedia:',
+                    '/wiki/portal:',
+                    '/wiki/talk:',
+                    '/wiki/template:',
+                    '/wiki/category:',
+                    '/wiki/file:',
+                    '/wiki/mediawiki:',
+                    '/wiki/user:'
+                ]
+                if any(path_lower.startswith(prefix) for prefix in skip_prefixes):
+                    return False
+
+                # Skip URLs with query parameters
+                if parsed.query:
+                    return False
+
+            # Skip donation and meta sites
+            skip_domains = ['donate.wikimedia.org', 'wikidata.org',
+                          'meta.wikimedia.org', 'commons.wikimedia.org']
+            if any(domain in parsed.netloc for domain in skip_domains):
+                return False
+
+            return True
+
         except:
             return False
 

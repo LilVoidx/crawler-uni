@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Inverted Index and Boolean Search
-Creates an inverted index and implements Boolean search with AND, OR, NOT operators.
+Creates an inverted index from lemmas and implements Boolean search with AND, OR, NOT operators.
 """
 
 import os
@@ -9,41 +9,83 @@ import json
 import re
 from pathlib import Path
 from collections import defaultdict
+import nltk
+from nltk.stem import WordNetLemmatizer
+
+try:
+    import pymorphy2
+    PYMORPHY2_AVAILABLE = True
+except ImportError:
+    PYMORPHY2_AVAILABLE = False
 
 
 class InvertedIndex:
-    def __init__(self, tokens_dir="tokens_output/tokens"):
-        self.tokens_dir = tokens_dir
+    def __init__(self, lemmas_dir="tokens_output/lemmas"):
+        self.lemmas_dir = lemmas_dir
         self.index = defaultdict(set)
         self.doc_count = 0
 
+        # Initialize lemmatizers for query processing
+        self._download_nltk_data()
+        self.en_lemmatizer = WordNetLemmatizer()
+        if PYMORPHY2_AVAILABLE:
+            self.ru_morph = pymorphy2.MorphAnalyzer()
+        else:
+            self.ru_morph = None
+
+    def _download_nltk_data(self):
+        """Download required NLTK resources"""
+        resources = ['wordnet', 'averaged_perceptron_tagger', 'omw-1.4']
+        for resource in resources:
+            try:
+                nltk.data.find(f'corpora/{resource}' if resource in ['wordnet', 'omw-1.4'] else f'taggers/{resource}')
+            except LookupError:
+                nltk.download(resource, quiet=True)
+
     def build_index(self):
-        """Build inverted index from token files"""
-        print("Building inverted index...")
+        """Build inverted index from lemma files"""
+        print("Building inverted index from lemmas...")
 
-        token_files = sorted(Path(self.tokens_dir).glob("page_*_tokens.txt"))
+        lemma_files = sorted(Path(self.lemmas_dir).glob("page_*_lemmas.txt"))
 
-        if not token_files:
-            print(f"No token files found in {self.tokens_dir}")
+        if not lemma_files:
+            print(f"No lemma files found in {self.lemmas_dir}")
             print("Please run Task 2 first.")
             return False
 
-        for token_file in token_files:
+        for lemma_file in lemma_files:
             # Extract document ID from filename
-            doc_id = token_file.stem.replace('page_', '').replace('_tokens', '')
+            doc_id = lemma_file.stem.replace('page_', '').replace('_lemmas', '')
 
-            # Read tokens from file
-            with open(token_file, 'r', encoding='utf-8') as f:
-                tokens = [line.strip() for line in f if line.strip()]
-
-            # Add to inverted index
-            for token in tokens:
-                self.index[token].add(doc_id)
+            # Read lemmas from file
+            with open(lemma_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        parts = line.split()
+                        if parts:
+                            lemma = parts[0]
+                            self.index[lemma].add(doc_id)
 
             self.doc_count += 1
 
-        print(f"Index built: {len(self.index)} unique terms, {self.doc_count} documents")
+        print(f"Index built: {len(self.index)} unique lemmas, {self.doc_count} documents")
         return True
+
+    def lemmatize_word(self, word):
+        """Lemmatize a single word"""
+        if re.match(r'^[a-zA-Z]+$', word):
+            # English lemmatization
+            lemma = self.en_lemmatizer.lemmatize(word, pos='n')
+            lemma = self.en_lemmatizer.lemmatize(lemma, pos='v')
+            lemma = self.en_lemmatizer.lemmatize(lemma, pos='a')
+            return lemma
+        elif re.match(r'^[а-яА-ЯёЁ]+$', word) and self.ru_morph:
+            # Russian lemmatization
+            parsed = self.ru_morph.parse(word)[0]
+            return parsed.normal_form
+        else:
+            return word
 
     def save_index(self, output_file="index_output/inverted_index.txt"):
         """Save inverted index to file"""
@@ -70,13 +112,16 @@ class InvertedIndex:
 
 
 class BooleanSearch:
-    def __init__(self, index):
+    def __init__(self, index, lemmatizer):
         self.index = index
+        self.lemmatizer = lemmatizer
 
     def search_term(self, term):
-        """Search for a single term"""
+        """Search for a single term (lemmatized)"""
         term = term.lower().strip()
-        return self.index.get(term, set())
+        # Lemmatize the search term
+        lemma = self.lemmatizer.lemmatize_word(term)
+        return self.index.get(lemma, set())
 
     def search_and(self, results1, results2):
         """AND operation: intersection"""
@@ -185,10 +230,11 @@ class BooleanSearch:
 def main():
     print("=" * 60)
     print("Task 3: Inverted Index and Boolean Search")
+    print("(Using lemmas with query lemmatization)")
     print("=" * 60)
 
     # Build inverted index
-    indexer = InvertedIndex(tokens_dir="tokens_output/tokens")
+    indexer = InvertedIndex(lemmas_dir="tokens_output/lemmas")
 
     if not indexer.build_index():
         return
@@ -199,7 +245,7 @@ def main():
     indexer.save_index_json("index_output/inverted_index.json")
 
     # Initialize Boolean search
-    searcher = BooleanSearch(indexer.index)
+    searcher = BooleanSearch(indexer.index, indexer)
 
     # Interactive search
     print("\n" + "=" * 60)

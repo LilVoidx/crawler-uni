@@ -64,16 +64,15 @@ class TokenProcessor:
 
         soup = BeautifulSoup(html_content, 'html.parser')
 
-        # Remove script and style elements
-        for script in soup(["script", "style"]):
-            script.decompose()
+        # Remove script, style, and navigation elements
+        for element in soup(["script", "style", "nav", "header", "footer"]):
+            element.decompose()
 
-        text = soup.get_text()
+        # Get text with separator to prevent word concatenation
+        text = soup.get_text(separator=' ', strip=True)
 
         # Clean up whitespace
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        text = ' '.join(chunk for chunk in chunks if chunk)
+        text = re.sub(r'\s+', ' ', text)
 
         return text
 
@@ -89,6 +88,10 @@ class TokenProcessor:
         """Check if token is valid (English or Russian)"""
         # Must be at least 2 characters
         if len(token) < 2:
+            return False
+
+        # Filter out unreasonably long words
+        if len(token) > 30:
             return False
 
         # Must be either English or Russian
