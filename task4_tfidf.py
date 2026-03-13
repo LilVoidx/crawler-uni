@@ -5,150 +5,195 @@ Computes TF-IDF for terms and lemmas from Task 2.
 """
 
 import os
+import re
 import math
-from collections import defaultdict, Counter
+import zipfile
+from pathlib import Path
+from bs4 import BeautifulSoup
 
 
 class TFIDFCalculator:
     """Calculates TF-IDF for terms and lemmas."""
 
-    def __init__(self, tokens_dir="tokens_output/tokens", lemmas_dir="tokens_output/lemmas",
+    def __init__(self,
+                 crawl_dir="crawl_output",
+                 tokens_vocab="tokens_output/tokens.txt",
+                 lemmas_vocab="tokens_output/lemmas.txt",
                  output_dir="tfidf_output"):
-        self.tokens_dir = tokens_dir
-        self.lemmas_dir = lemmas_dir
+        self.crawl_dir = crawl_dir
+        self.tokens_vocab_path = tokens_vocab
+        self.lemmas_vocab_path = lemmas_vocab
         self.output_dir = output_dir
 
-    def read_file_terms(self, file_path):
-        """Read terms from a token or lemma file."""
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+    # Vocabulary loading
 
-        # Split by whitespace and filter empty strings
-        terms = [term.strip() for term in content.split() if term.strip()]
-        return terms
+    def load_all_tokens(self):
+        """Read global token list from tokens_output/tokens.txt."""
+        with open(self.tokens_vocab_path, 'r', encoding='utf-8') as f:
+            tokens = [line.strip() for line in f if line.strip()]
+        return tokens
 
-    def compute_tf(self, terms):
-        """Compute term frequency for each term in a document."""
-        return Counter(terms)
-
-    def compute_idf(self, doc_terms_list, all_terms):
+    def load_lemmas_dict(self):
         """
-        Compute IDF for all terms across all documents.
+        Read global lemmas from tokens_output/lemmas.txt.
+        Format: "lemma: form1 form2 ..."
+        Returns {lemma: [form1, form2, ...]}
+        """
+        lemmas = {}
+        with open(self.lemmas_vocab_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                # Split on the colon
+                colon_idx = line.index(':')
+                lemma = line[:colon_idx].strip()
+                forms_str = line[colon_idx + 1:].strip()
+                forms = forms_str.split() if forms_str else []
+                lemmas[lemma] = forms
+        return lemmas
+
+    # Text extraction (same logic as Task 2)
+
+    def extract_words_from_html(self, html_file):
+        """
+        Extract all [a-zA-Z]+ words from an HTML page
+        (after removing script/style/meta/noscript tags).
+        Returns a list of lowercased words (with repetitions for TF counting).
+        """
+        with open(html_file, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        for element in soup(["script", "style", "meta", "noscript"]):
+            element.decompose()
+
+        text = soup.get_text(separator=' ')
+        words = re.findall(r'[a-zA-Z]+', text)
+        return [w.lower() for w in words]
+
+    # IDF
+
+    def compute_idf(self, all_terms, doc_words_list):
+        """
         IDF(t) = log(N / df(t))
-        where N = total number of documents, df(t) = number of documents containing term t
+        N = number of documents, df(t) = docs containing term t.
         """
-        N = len(doc_terms_list)
-        df = defaultdict(int) 
+        N = len(doc_words_list)
+        df = {}
+        for term in all_terms:
+            df[term] = sum(1 for words in doc_words_list if term in words)
 
-        # Count how many documents contain each term
-        for terms in doc_terms_list:
-            unique_terms = set(terms)
-            for term in unique_terms:
-                df[term] += 1
-
-        # Compute IDF
         idf = {}
         for term in all_terms:
-            if df[term] > 0:
-                idf[term] = math.log(N / df[term])
-            else:
-                idf[term] = 0
-
+            idf[term] = math.log(N / df[term]) if df[term] > 0 else 0.0
         return idf
 
-    def process_directory(self, input_dir, output_subdir, file_suffix):
-        """Process all files in a directory and compute TF-IDF."""
-        print(f"Processing {input_dir}...")
-
-        # Get all input files
-        files = sorted([f for f in os.listdir(input_dir) if f.endswith(file_suffix)])
-        if not files:
-            print(f"No files found in {input_dir}")
-            return
-
-        print(f"Found {len(files)} files")
-
-        # Read all documents
-        doc_terms = {}  # doc_id -> list of terms
-        all_terms = set()
-
-        for file_name in files:
-            file_path = os.path.join(input_dir, file_name)
-            terms = self.read_file_terms(file_path)
-            doc_terms[file_name] = terms
-            all_terms.update(terms)
-
-        print(f"Total unique terms: {len(all_terms)}")
-
-        # Compute IDF for all terms
-        doc_terms_list = list(doc_terms.values())
-        idf = self.compute_idf(doc_terms_list, all_terms)
-
-        # Create output directory
-        output_dir = os.path.join(self.output_dir, output_subdir)
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Compute TF-IDF for each document
-        for file_name, terms in doc_terms.items():
-            # Compute TF
-            tf = self.compute_tf(terms)
-
-            # Compute TF-IDF
-            tfidf = {}
-            for term, tf_value in tf.items():
-                tfidf[term] = tf_value * idf[term]
-
-            # Sort by term name for consistent output
-            sorted_terms = sorted(tfidf.keys())
-
-            # Write output file
-            output_file = file_name.replace(file_suffix, '_tfidf.txt')
-            output_path = os.path.join(output_dir, output_file)
-
-            with open(output_path, 'w', encoding='utf-8') as f:
-                for term in sorted_terms:
-                    f.write(f"{term} {idf[term]:.6f} {tfidf[term]:.6f}\n")
-
-        print(f"✓ Created {len(doc_terms)} TF-IDF files in {output_dir}")
+    # ------------------------------------------------------------------
+    # Main processing
+    # ------------------------------------------------------------------
 
     def run(self):
-        """Process both tokens and lemmas."""
+        """Compute TF-IDF for terms and lemmas, write output files."""
         print("=" * 50)
         print("Task 4: TF-IDF Calculator")
         print("=" * 50)
-        print()
 
-        # Check input directories exist
-        if not os.path.exists(self.tokens_dir):
-            print(f"Error: Tokens directory not found: {self.tokens_dir}")
-            print("Please run Task 2 first.")
+        # Load vocabulary
+        if not os.path.exists(self.tokens_vocab_path):
+            print(f"Error: {self.tokens_vocab_path} not found. Run Task 2 first.")
+            return
+        if not os.path.exists(self.lemmas_vocab_path):
+            print(f"Error: {self.lemmas_vocab_path} not found. Run Task 2 first.")
             return
 
-        if not os.path.exists(self.lemmas_dir):
-            print(f"Error: Lemmas directory not found: {self.lemmas_dir}")
-            print("Please run Task 2 first.")
+        print("\nLoading vocabulary...")
+        all_tokens = self.load_all_tokens()
+        lemmas_dict = self.load_lemmas_dict()
+        print(f"  Tokens: {len(all_tokens)}, Lemmas: {len(lemmas_dict)}")
+
+        # Collect HTML files sorted, map to 0-indexed output filenames
+        html_files = sorted(Path(self.crawl_dir).glob("page_*.html"))
+        if not html_files:
+            print(f"No HTML files found in {self.crawl_dir}")
             return
+        print(f"\nFound {len(html_files)} HTML files")
 
-        # Create output directory
-        os.makedirs(self.output_dir, exist_ok=True)
+        # Create output directories
+        terms_out_dir = os.path.join(self.output_dir, "tf_idf_terms")
+        lemmas_out_dir = os.path.join(self.output_dir, "tf_idf_lemmas")
+        os.makedirs(terms_out_dir, exist_ok=True)
+        os.makedirs(lemmas_out_dir, exist_ok=True)
 
-        # Process tokens
-        print("\n1. Processing tokens...")
-        self.process_directory(self.tokens_dir, "tokens", "_tokens.txt")
+        # Extract words from each document (with repetitions for TF)
+        print("\nExtracting words from HTML files...")
+        doc_words = []        # list of word lists
+        doc_word_sets = []    # list of sets (for IDF df computation)
+        for html_file in html_files:
+            words = self.extract_words_from_html(html_file)
+            doc_words.append(words)
+            doc_word_sets.append(set(words))
 
-        # Process lemmas
-        print("\n2. Processing lemmas...")
-        self.process_directory(self.lemmas_dir, "lemmas", "_lemmas.txt")
+        # ---- TERMS ----
+        print("\n1. Computing TF-IDF for terms...")
+        idf_terms = self.compute_idf(all_tokens, doc_word_sets)
+
+        for idx, (html_file, words) in enumerate(zip(html_files, doc_words)):
+            total = len(words)
+            out_name = f"{idx}.txt"
+            out_path = os.path.join(terms_out_dir, out_name)
+
+            with open(out_path, 'w', encoding='utf-8') as f:
+                for term in sorted(all_tokens):
+                    count = words.count(term)
+                    if count == 0:
+                        continue
+                    tf = count / total if total > 0 else 0.0
+                    tfidf = tf * idf_terms[term]
+                    f.write(f"{term} {idf_terms[term]:.6f} {tfidf:.6f}\n")
+
+        print(f"  Written {len(html_files)} files to {terms_out_dir}")
+
+        # ---- LEMMAS ----
+        print("\n2. Computing TF-IDF for lemmas...")
+        all_lemmas = list(lemmas_dict.keys())
+        idf_lemmas = self.compute_idf(all_lemmas, doc_word_sets)
+
+        for idx, (html_file, words) in enumerate(zip(html_files, doc_words)):
+            total = len(words)
+            out_name = f"{idx}.txt"
+            out_path = os.path.join(lemmas_out_dir, out_name)
+
+            with open(out_path, 'w', encoding='utf-8') as f:
+                for lemma in sorted(all_lemmas):
+                    variants = lemmas_dict[lemma]
+                    count = sum(words.count(v) for v in variants)
+                    if count == 0:
+                        continue
+                    tf = count / total if total > 0 else 0.0
+                    tfidf = tf * idf_lemmas[lemma]
+                    f.write(f"{lemma} {idf_lemmas[lemma]:.6f} {tfidf:.6f}\n")
+
+        print(f"  Written {len(html_files)} files to {lemmas_out_dir}")
+
+        # ---- ARCHIVE ----
+        print("\nCreating archive...")
+        archive_path = os.path.join(self.output_dir, "Archive.zip")
+        with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for folder, subdir in [(terms_out_dir, "tf_idf_terms"),
+                                   (lemmas_out_dir, "tf_idf_lemmas")]:
+                for file in sorted(Path(folder).glob("*.txt")):
+                    zf.write(file, arcname=f"{subdir}/{file.name}")
+        print(f"Archive: {archive_path}")
 
         print()
         print("=" * 50)
         print("TF-IDF calculation complete!")
         print("=" * 50)
-        print()
-        print("Output files:")
-        print(f"  - Token TF-IDF: {self.output_dir}/tokens/")
-        print(f"  - Lemma TF-IDF: {self.output_dir}/lemmas/")
-        print()
+        print(f"\nOutput:")
+        print(f"  Terms:  {terms_out_dir}")
+        print(f"  Lemmas: {lemmas_out_dir}")
+        print(f"  Zip:    {archive_path}")
 
 
 def main():
